@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lab 8 - D3 Weather Chart</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    svg {
+      font-family: sans-serif;
+    }
+    .line {
+      fill: none;
+      stroke-width: 2px;
+    }
+    .high { stroke: red; }
+    .low { stroke: blue; }
+  </style>
+</head>
+<body>
+  <svg width="700" height="400"></svg>
+
+  <script>
+    const data = [
+      { day: 'Sat', high: 82, low: 67 },
+      { day: 'Sun', high: 81, low: 59 },
+      { day: 'Mon', high: 81, low: 50 },
+      { day: 'Tue', high: 70, low: 47 },
+      { day: 'Wed', high: 77, low: 51 },
+      { day: 'Thu', high: 78, low: 60 },
+      { day: 'Fri', high: 79, low: 66 },
+      { day: 'Sat2', high: 80, low: 66 }
+    ];
+
+    const svg = d3.select("svg");
+    const width = +svg.attr("width") - 50;
+    const height = +svg.attr("height") - 50;
+    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+    const x = d3.scalePoint()
+      .domain(data.map(d => d.day))
+      .range([margin.left, width - margin.right]);
+
+    const y = d3.scaleLinear()
+      .domain([d3.min(data, d => d.low) - 5, d3.max(data, d => d.high) + 5])
+      .nice()
+      .range([height - margin.bottom, margin.top]);
+
+    const line = d3.line()
+      .x(d => x(d.day))
+      .y(d => y(d.value));
+
+    const displayDay = d => d === "Sat2" ? "Sat" : d;
+
+    svg.append("text")
+      .attr("x", (width + margin.left) / 2)
+      .attr("y", margin.top)
+      .attr("text-anchor", "middle")
+      .style("font-size", "18px")
+      .style("font-weight", "bold")
+      .text("Weekly Temperature Forecast in College Station");
+
+    svg.append("g")
+      .attr("transform", `translate(0,${height - margin.bottom})`)
+      .call(d3.axisBottom(x).tickFormat(displayDay));
+
+    svg.append("text")
+      .attr("x", (width + margin.left) / 2)
+      .attr("y", height + margin.bottom + 5)
+      .attr("text-anchor", "middle")
+      .html('<tspan fill="red">Highest</tspan> / <tspan fill="blue">Lowest</tspan>')
+
+    svg.append("g")
+      .attr("transform", `translate(${margin.left},0)`)
+      .call(d3.axisLeft(y));
+
+    svg.append("g")
+      .attr("transform", 'translate(${margin.left},0)')
+      .call(d3.axisLeft(y));
+
+    svg.append("text")
+      .attr("transform", 'rotate(-90)')
+      .attr("x", -(height / 2))
+      .attr("y", 30)
+      .attr("dy", "-1em")
+      .attr("text-anchor", "middle")
+      .text("Temperature (°F)");
+
+    svg.append("path")
+      .datum(data.map(d => ({ day: d.day, value: d.high })))
+      .attr("class", "line high")
+      .attr("d", line);
+
+    svg.append("path")
+      .datum(data.map(d => ({ day: d.day, value: d.low })))
+      .attr("class", "line low")
+      .attr("d", line);
+  </script>
+</body>
+</html>
